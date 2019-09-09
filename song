@@ -1,0 +1,36 @@
+＃代码
+＃爬取网站：HTTP：//www.htqyy.com/
+improt requests
+import re
+import time
+# 此处是设置浏览器的请求头，可在谷歌浏览器中的F12开发者工具中找到
+headers = {
+      'User-Agent':' Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36'
+}
+page = int(input("请输入您要爬取的页数："))
+Name = []
+NameID = []
+for i in range(0,page):
+      url = "http://www.htqyy.com/top/musicList/new?pageIndex="+str(i)+"&pageSize=20"
+      html = requests.get(url,headers)
+      strurl = html.text
+      # <a href="/play/1621" target="play" title="太阳的后裔OST《Always》" sid="1621">
+      # 从网页中找到要爬取的标签信息，然后用xpath正则进行数据的规范爬取（19-20）
+      biaoqian1 = r'title="(.*?)" sid'
+      biaoqian2 = r'sid="(.*?)"'
+      name1 = re.findall(biaoqian1, strurl)
+      nameid = re.findall(biaoqian2, strurl)
+      Name.extend(name1)
+      NameID.extend(nameid)
+      #print(Name,NameID) 此处可以输出爬取下来的歌曲名和歌曲id列表。
+# 用for循环 爬取每一首歌曲，首先找到每首歌曲下的url。
+for i in range(0,len(NameID)):
+      songurl = 'http://f2.htqyy.com/play7/"+str(NameID[i])+"/mp3/7'
+      songname = Name[i]
+      data = requests.get(songurl).content
+      print("正在下载第",i+1,"首歌曲")
+      # 此处下代码功能是储存爬取的数据文件夹。
+      with open("C:\\Users\\Administrator\\Desktop\\JAVA\\{}.MP3".format(songname), "wb") as f:
+            f.write(data)
+      # 此处是爬取每首歌曲时间间隔为4秒，防止过于频繁爬取被发现了。
+      time.sleep(4)
